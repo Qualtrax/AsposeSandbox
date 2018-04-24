@@ -60,9 +60,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AsposePdfDocumentCopier.cs" />
     <Compile Include="AsposePdfUtilities.cs" />
+    <Compile Include="AsposeWordDocumentCopier.cs" />
     <Compile Include="AsposeWordUtilities.cs" />
+    <Compile Include="CommonUtilities.cs" />
     <Compile Include="CustomException.cs" />
+    <Compile Include="IDocumentCopier.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

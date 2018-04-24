@@ -7,30 +7,36 @@ namespace AsposeExample
 {
     public static class AsposeWordUtilities
     {
-        public static TReturn WithAsposeExceptions<TReturn>(Func<TReturn> operate)
+        public static TReturn ThrowException<TReturn>(Exception ex)
+            => throw ex;
+
+        public static TReturn HandleAsposeExceptions<TReturn>(Func<TReturn> operate, Func<Exception, TReturn> catchOperate)
         {
             try
             {
                 return operate();
             }
-            catch (FileCorruptedException fileCorrupted)
+            catch (FileCorruptedException fileCorruptedException)
             {
-                throw new CustomException(fileCorrupted);
+                return catchOperate(MapFileCorruptedExceptionToCustomException(fileCorruptedException));
             }
-            catch (FileNotFoundException fileNotFound)
+            catch (FileNotFoundException fileNotFoundException)
             {
-                throw new CustomException(fileNotFound);
+                return catchOperate(CommonUtilities.MapFileNotFoundExceptionToCustomException(fileNotFoundException));
             }
             catch (Exception ex)
             {
-                throw new CustomException(ex);
+                return catchOperate(CommonUtilities.MapExceptionToCustomException(ex));
             }
         }
 
-        public static Document CreateWordDocument(string fileName)
-            => WithAsposeExceptions(() => new Document(fileName));
+        public static CustomException MapFileCorruptedExceptionToCustomException(FileCorruptedException fileCorruptedException)
+            => new CustomException(fileCorruptedException);
 
-        public static SaveOutputParameters SaveWordDocument(Document document, string newFileName)
-            => WithAsposeExceptions(() => document.Save(newFileName));
+        public static TReturn HandleAsposeExceptionsWithThrow<TReturn>(Func<TReturn> operate)
+            => HandleAsposeExceptions(operate, ThrowException<TReturn>);
+
+        public static TReturn HandleAsposeExceptionsWithThrowAndFinally<TReturn>(Func<TReturn> operate, Action finallyOperate)
+            => HandleAsposeExceptions(() => CommonUtilities.AndFinally(operate, finallyOperate), ThrowException<TReturn>);
     }
 }

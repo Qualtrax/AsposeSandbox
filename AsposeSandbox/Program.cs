@@ -1,4 +1,7 @@
-﻿namespace AsposeExample
+﻿using System;
+using Aspose.Words.Saving;
+
+namespace AsposeExample
 {
     public class Program
     {
@@ -7,17 +10,11 @@
             var fileName = "test.doc";
             var newFileName = "newTest.doc";
 
-            var wordDocument1 = AsposeWordUtilities.WithAsposeExceptions(() => new Aspose.Words.Document(fileName));
-            var wordDocument2 = AsposeWordUtilities.CreateWordDocument(fileName);
+            IDocumentCopier wordDocumentCopier = new AsposeWordDocumentCopier();
+            wordDocumentCopier.CopyDocument(fileName, newFileName);
 
-            var wordParameters1 = AsposeWordUtilities.WithAsposeExceptions(() => wordDocument1.Save(newFileName));
-            var wordParameters2 = AsposeWordUtilities.SaveWordDocument(wordDocument2, newFileName);
-
-            var pdf1 = AsposePdfUtilities.WithAsposeExceptions(() => new Aspose.Pdf.Document(fileName));
-            var pdf2 = AsposePdfUtilities.CreatePdfDocument(fileName);
-
-            pdf1 = AsposePdfUtilities.WithAsposeExceptions(() => { pdf1.Save(newFileName); return pdf1; });
-            AsposePdfUtilities.SavePdfDocument(pdf2, newFileName);
+            IDocumentCopier pdfDocumentCopier = new AsposePdfDocumentCopier();
+            pdfDocumentCopier.CopyDocument(fileName, newFileName);
         }
     }
 }

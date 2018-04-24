@@ -6,7 +6,10 @@ namespace AsposeExample
 {
     public static class AsposePdfUtilities
     {
-        public static TReturn WithAsposeExceptions<TReturn>(Func<TReturn> operate)
+        public static TReturn ThrowException<TReturn>(Exception ex)
+            => throw ex;
+
+        public static TReturn HandleAsposeExceptions<TReturn>(Func<TReturn> operate, Func<Exception, TReturn> catchOperate)
         {
             try
             {
@@ -14,22 +17,25 @@ namespace AsposeExample
             }
             catch (InvalidFileFormatException invalidFileFormat)
             {
-                throw new CustomException(invalidFileFormat);
+                return catchOperate(MapInvalidFileFormatExceptionToCustomException(invalidFileFormat));
             }
             catch (FileNotFoundException fileNotFound)
             {
-                throw new CustomException(fileNotFound);
+                return catchOperate(CommonUtilities.MapFileNotFoundExceptionToCustomException(fileNotFound));
             }
             catch (Exception ex)
             {
-                throw new CustomException(ex);
+                return catchOperate(CommonUtilities.MapExceptionToCustomException(ex));
             }
         }
 
-        public static Document CreatePdfDocument(string fileName)
-            => WithAsposeExceptions(() => new Document(fileName));
+        public static CustomException MapInvalidFileFormatExceptionToCustomException(InvalidFileFormatException invalidFileFormatException)
+            => new CustomException(invalidFileFormatException);
 
-        public static Document SavePdfDocument(Document document, string newFileName)
-            => WithAsposeExceptions(() => { document.Save(newFileName); return document; });
+        public static TReturn HandleAsposeExceptionsWithThrow<TReturn>(Func<TReturn> operate)
+            => HandleAsposeExceptions(operate, ThrowException<TReturn>);
+
+        public static TReturn HandleAsposeExceptionsWithThrowAndFinally<TReturn>(Func<TReturn> operate, Action finallyOperate)
+            => HandleAsposeExceptions(() => CommonUtilities.AndFinally(operate, finallyOperate), ThrowException<TReturn>);
     }
 }
